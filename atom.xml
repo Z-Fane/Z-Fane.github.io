@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://zhangfane.github.io</id>
     <title>Gridea</title>
-    <updated>2020-04-05T06:39:46.377Z</updated>
+    <updated>2020-04-05T06:44:40.294Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://zhangfane.github.io"/>
     <link rel="self" href="https://zhangfane.github.io/atom.xml"/>
@@ -26,17 +26,21 @@
 </code></pre>
 <ul>
 <li>Describe：Describe方法用来注册prometheus.Collector创建的指标。</li>
-<li>Collect：Collect方法用来执行采集任务，为指标赋值即可。<br>
-构建Exporter时，创建prometheus.Collector的实例，调用这两个方法即可完成Exporter对target的采集。<br>
-但如果把采集的逻辑全部都放在Collect方法里面，将导致采集逻辑大量堆砌，可读性将非常差，所以NodeExporter又定义了一个collector.Collector接口，将某一类的采集封装起来。<br>
-那么此时，NodeExporter来说，它包含两个Collector</li>
-<li>prometheus.Collector</li>
-<li>collector.Collector<br>
-这两者都是用来做采集的，但是collector.Collector实例是真正执行采集指标的业务，而prometheus.Collector用来采集collector.Collector的采集信息，这句话听上去很绕，什么意思呢？NodeExporter的Describe中向prometheus传递了两个指标</li>
-<li>scrapeDuration: 记录collector.Collector实例采集任务执行的时间</li>
-<li>scrapeSuccess: 记录collector.Collector实例采集任务执行状态（成功或失败)<br>
-根据指标的描述，这就很好理解“prometheus.Collector用来采集collector.Collector的采集信息”这句话的含义了。下面是其代码逻辑的实现</li>
+<li>Collect：Collect方法用来执行采集任务，为指标赋值即可。</li>
 </ul>
+<p>构建Exporter时，创建prometheus.Collector的实例，调用这两个方法即可完成Exporter对target的采集。<br>
+但如果把采集的逻辑全部都放在Collect方法里面，将导致采集逻辑大量堆砌，可读性将非常差，所以NodeExporter又定义了一个collector.Collector接口，将某一类的采集封装起来。<br>
+那么此时，NodeExporter来说，它包含两个Collector</p>
+<ul>
+<li>prometheus.Collector</li>
+<li>collector.Collector</li>
+</ul>
+<p>这两者都是用来做采集的，但是collector.Collector实例是真正执行采集指标的业务，而prometheus.Collector用来采集collector.Collector的采集信息，这句话听上去很绕，什么意思呢？NodeExporter的Describe中向prometheus传递了两个指标</p>
+<ul>
+<li>scrapeDuration: 记录collector.Collector实例采集任务执行的时间</li>
+<li>scrapeSuccess: 记录collector.Collector实例采集任务执行状态（成功或失败)</li>
+</ul>
+<p>根据指标的描述，这就很好理解“prometheus.Collector用来采集collector.Collector的采集信息”这句话的含义了。下面是其代码逻辑的实现</p>
 <h3 id="prometheuscollectorcollect">prometheus.Collector.Collect</h3>
 <p>其核心逻辑是为每个collector.Collector实例创建一个goroutine来收集监控指标</p>
 <pre><code class="language-golang">// Collect implements the prometheus.Collector interface.
